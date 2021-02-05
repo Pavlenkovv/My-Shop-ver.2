@@ -21,7 +21,7 @@ class LatestProductManager:
     def get_products_for_main_page(*args, **kwargs):
         with_respect_to = kwargs.get('with_respect_to')
         products = []
-        ct_models = ContentType.filter(model__in=args)
+        ct_models = ContentType.objects.filter(model__in=args)
         for ct_model in ct_models:
             model_products = ct_model.model_class()._base_manager.all().order_by('-id')[:5]
             products.extend(model_products)
@@ -103,11 +103,11 @@ class Smartphone(Product):
     diagonal = models.CharField(max_length=255, verbose_name='Діагональ')
     display_type = models.CharField(max_length=255, verbose_name='Тип дисплея')
     resolution = models.CharField(max_length=255, verbose_name='Розширення екрану')
-    accum_volume = models.CharField(max_length=255, verbose_name='Об\'єм батареї')
+    accum_volume = models.CharField(max_length=255, verbose_name="Об'єм батареї")
     ram = models.CharField(max_length=255, verbose_name="Оперативна пам'ять")
-    sd = models.BooleanField(default=True, verbose_name="Слот для карт пам\'яті")
+    sd = models.BooleanField(default=True, verbose_name="Слот для карт пам'яті")
     sd_volume_max = models.CharField(
-                        max_length=255, null=True, blank=True, verbose_name='Максимальний об\'єм карти пам\'яті'
+                        max_length=255, null=True, blank=True, verbose_name="Максимальний об'єм карти пам'яті"
     )
     main_cam_mp = models.CharField(max_length=255, verbose_name='Головна камера')
     frontal_cam_mp = models.CharField(max_length=255, verbose_name='Фронтальна камера')
