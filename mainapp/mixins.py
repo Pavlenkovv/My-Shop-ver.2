@@ -1,6 +1,6 @@
 from django.views.generic.detail import SingleObjectMixin
 
-from .models import Category  #, Card, Customer, Notebook, Smartphone
+from .models import Category  #, Cart, Customer, Notebook, Smartphone
 
 
 class CategoryDetailMixin(SingleObjectMixin):
