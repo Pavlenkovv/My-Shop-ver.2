@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3 class="text-center mt-5 mb-5">Ваш кошик {% if not cart.products.count %} порожня{% endif %} </h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Найменування</th>
+      <th scope="col">Зображення</th>
+      <th scope="col">Ціна</th>
+      <th scope="col">Кількісь</th>
+      <th scope="col">Загальна вартість</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for item in cart.products.all %}
+    <tr>
+      <th scope="row">{{ item.content_object.title }}</th>
+      <td class="w-25"><img src="{{ item.content_object.image.url }}" class="img-fluid"></td>
+      <td>{{ item.content_object.price }} руб.</td>
+      <td>{{ item.quantity }}</td>
+       <td>{{ item.final_price }} грн</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% endblock content %}
