@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -5,8 +6,9 @@ from django.shortcuts import render
 from django.views.generic import DetailView, View
 
 from .mixins import CategoryDetailMixin, CartMixin
-from .models import Notebook, Smartphone, Category, LatestProducts, CartProduct
+from .models import Notebook, Smartphone, Category, LatestProducts, CartProduct, Customer
 from .forms import OrderForm
+from .utils import recalc_cart
 
 
 class BaseView(CartMixin, View):
@@ -68,7 +70,7 @@ class AddToCardView(CartMixin, View):
         )
         if created:
             self.cart.products.add(cart_product)
-        self.cart.save()
+        recalc_cart(self.cart)
         messages.add_message(request, messages.INFO, "Товар успішно додано")
         return HttpResponseRedirect('/cart/')
 
@@ -83,7 +85,7 @@ class DeleteFromCartView(CartMixin, View):
         )
         self.cart.products.remove(cart_product)
         cart_product.delete()
-        self.cart.save()
+        recalc_cart(self.cart)
         messages.add_message(request, messages.INFO, "Товар успішно видалено")
         return HttpResponseRedirect('/cart/')
 
@@ -99,7 +101,7 @@ class ChangeQuantityView(CartMixin, View):
         quantity = int(request.POST.get('quantity'))
         cart_product.quantity = quantity
         cart_product.save()
-        self.cart.save()
+        recalc_cart(self.cart)
         messages.add_message(request, messages.INFO, "Кількість успішно змінено")
         return HttpResponseRedirect('/cart/')
 
@@ -124,3 +126,29 @@ class CheckoutView(CartMixin, View):
             'form': form
         }
         return render(request, 'checkout.html', context)
+
+
+class MakeOrderView(CartMixin, View):
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        form = OrderForm(request.POST or None)
+        customer = Customer.objects.get(user=request.user)
+        if form.is_valid():
+            new_order = form.save(commit=False)
+            new_order.customer = customer
+            new_order.first_name = form.cleaned_data['first_name']
+            new_order.last_name = form.cleaned_data['last_name']
+            new_order.phone = form.cleaned_data['phone']
+            new_order.address = form.cleaned_data['address']
+            new_order.buying_type = form.cleaned_data['buying_type']
+            new_order.order_date = form.cleaned_data['order_date']
+            new_order.comment = form.cleaned_data['comment']
+            new_order.save()
+            self.cart.in_order = True
+            new_order.cart = self.cart
+            self.cart.save()
+            new_order.save()
+            customer.orders.add(new_order)
+            messages.add_message(request, messages.INFO, 'Дякуємо за замовлення! Менеджер Вам зателефонує')
+            return HttpResponseRedirect('/')
+        return HttpResponseRedirect('/checkout/')

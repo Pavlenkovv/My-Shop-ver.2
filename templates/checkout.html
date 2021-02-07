@@ -33,8 +33,9 @@
     </table>
     <hr>
     <h3 class="text-center mt-5 mb-5">Форма замовлення</h3>
-    <form action="" method="post">
-    {{ form|crispy }}
-    <input type="submit" class="btn btn-success btn-block mb-3" value="Оформити замовлення">
+    <form action="{% url 'make_order' %}" method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <input type="submit" class="btn btn-success btn-block mb-3" value="Оформити замовлення">
     </form>
 {% endblock content %}

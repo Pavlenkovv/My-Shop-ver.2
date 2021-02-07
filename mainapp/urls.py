@@ -7,7 +7,8 @@ from .views import(
     AddToCardView,
     DeleteFromCartView,
     ChangeQuantityView,
-    CheckoutView
+    CheckoutView,
+    MakeOrderView
 )
 
 
@@ -19,5 +20,6 @@ urlpatterns = [
     path('add-to-cart/<str:ct_model>/<str:slug>/', AddToCardView.as_view(), name='add_to_cart'),
     path('remove-to-cart/<str:ct_model>/<str:slug>/', DeleteFromCartView.as_view(), name='delete_from_cart'),
     path('change-quantity/<str:ct_model>/<str:slug>/', ChangeQuantityView.as_view(), name='change_quantity'),
-    path('checkout/', CheckoutView.as_view(), name='checkout')
+    path('checkout/', CheckoutView.as_view(), name='checkout'),
+    path('make-order/', MakeOrderView.as_view(), name='make_order'),
 ]
