@@ -78,7 +78,7 @@ class Product(models.Model):
     slug = models.SlugField(unique=True)
     image = models.ImageField(verbose_name="Зображення")
     description = models.TextField(verbose_name="Опис", null=True)
-    price = models.DecimalField(max_digits=7, decimal_places=2, verbose_name="Ціна")
+    price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name="Ціна")
 
     def __str__(self):
         return self.title
@@ -129,7 +129,7 @@ class CartProduct(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     quantity = models.PositiveIntegerField(default=1)
-    final_price = models.DecimalField(max_digits=7, decimal_places=2, verbose_name='Загальна сума')
+    final_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Загальна сума')
 
     def __str__(self):
         return f'Продукт {self.content_object.title}'
@@ -143,7 +143,7 @@ class Cart(models.Model):
     owner = models.ForeignKey('Customer', null=True, verbose_name='Власник', on_delete=models.CASCADE)
     products = models.ManyToManyField(CartProduct, blank=True, related_name='related_cart')
     total_products = models.PositiveIntegerField(default=0)
-    final_price = models.DecimalField(max_digits=7, decimal_places=2, default=0, verbose_name='Загальна вартість')
+    final_price = models.DecimalField(max_digits=9, decimal_places=2, default=0, verbose_name='Загальна вартість')
     in_order = models.BooleanField(default=False)
     for_anonymous_user = models.BooleanField(default=False)
 
