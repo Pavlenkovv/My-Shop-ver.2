@@ -17,11 +17,9 @@
             <p>Ціна: {{ product.price }} грн</p>
             <p>Опис: {{ product.description }}</p>
             <hr>
-            <a href="{% url 'add_to_cart' ct_model=ct_model slug=product.slug %}">
+            <a href="{% url 'add_to_cart' slug=product.slug %}">
                 <button class="btn btn-danger">Додати в кошик</button>
             </a>
         </div>
-        <p class="mt-4">Характеристики:</p>
-        {{ product|product_spec }}
     </div>
 {% endblock content %}

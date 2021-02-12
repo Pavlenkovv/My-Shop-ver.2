@@ -4,7 +4,7 @@ from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from .models import Category, Notebook, Cart, Customer, CartProduct
+from .models import Category, Cart, Customer, CartProduct, Product
 from .views import recalc_cart, AddToCardView, BaseView
 
 
@@ -16,7 +16,7 @@ class ShopTestCases(TestCase):
         self.user = User.objects.create(username='testuser', password='password')
         self.category = Category.objects.create(name='Ноутбуки', slug='notebooks')
         image = SimpleUploadedFile("notebook_image.jpg", content=b'', content_type="image/jpg")
-        self.notebook = Notebook.objects.create(
+        self.notebook = Product.objects.create(
             category=self.category,
             title="Test Notebook",
             slug="test-slug",
