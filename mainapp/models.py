@@ -52,6 +52,10 @@ class CartProduct(models.Model):
         super().save(*args, **kwargs)
 
 
+class ProductFeatures(models.Model):
+    pass
+
+
 class Cart(models.Model):
     owner = models.ForeignKey('Customer', null=True, verbose_name='Власник', on_delete=models.CASCADE)
     products = models.ManyToManyField(CartProduct, blank=True, related_name='related_cart')
@@ -85,7 +89,7 @@ class Order(models.Model):
     BUYING_TYPE_DELIVERY = 'delivery'
 
     STATUS_CHOICES = (
-        (STATUS_NEW, 'Нове замщвлення'),
+        (STATUS_NEW, 'Нове замовлення'),
         (STATUS_IN_PROGRESS, 'Замовлення в обробці'),
         (STATUS_READY, 'Замовлення готове'),
         (STATUS_COMPLETED, 'Замовлення виконане')
