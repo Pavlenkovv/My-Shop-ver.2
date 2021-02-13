@@ -4,7 +4,6 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 
-
 User = get_user_model()
 
 
@@ -17,6 +16,12 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return reverse('category_detail', kwargs={'slug': self.slug})
+
+    def get_fields_for_filter_in_template(self):
+        return ProductFeatures.objects.filter(
+            category=self,
+            use_in_filter=True,
+        ).prefetch_related('category').value('feature_key', 'feature_measure', 'feature_name', 'filter_type')
 
 
 class Product(models.Model):
@@ -53,7 +58,56 @@ class CartProduct(models.Model):
 
 
 class ProductFeatures(models.Model):
-    pass
+    RADIO = 'radio'
+    CHECKBOX = 'checkbox'
+
+    FILTER_TYPE_CHOICES = (
+        (RADIO, 'Радіокнопка'),
+        (CHECKBOX, 'Чекбокс')
+    )
+    feature_key = models.CharField(max_length=255, verbose_name='Ключ характеристики')
+    feature_name = models.CharField(max_length=255, verbose_name='Найменування характеристики')
+    postfix_for_value = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        verbose_name='Постфікс для значення',
+        help_text=f'Наприклад для характеристики "Години роботи" можна додати '
+                  f'постфікс "годин", і як результат - значення "10 годин"'
+    )
+    use_in_filter = models.BooleanField(default=False, verbose_name='Використовувати у фільтрі товарів у шаблоні')
+    filter_type = models.CharField(
+        max_length=20,
+        verbose_name='Тип фільтра',
+        default=CHECKBOX,
+        choices=FILTER_TYPE_CHOICES
+    )
+    filter_measure = models.CharField(
+        max_length=50,
+        verbose_name='Одиниця виміру для фільтра',
+        help_text='Одиниця виміру для конкретного фільтраю Наприклад "Частота процесору (GHz). '
+                  'Одиницею виміру буде інформація в дужках"'
+    )
+
+    def __str__(self):
+        return f'Категорія - "{self.category.name}" | Характеристика - "{self.feature_name}"'
+
+
+class ProductFeatureValidators(models.Model):
+    category = models.ForeignKey(Category, verbose_name='Категорія', on_delete=models.CASCADE)
+    feature = models.ForeignKey(
+        ProductFeatures, verbose_name='Характеристики', null=True, blank=True, on_delete=models.CASCADE
+    )
+    feature_value = models.CharField(
+        max_length=255, unique=True, null=True, blank=True, verbose_name='Значення характеристики'
+    )
+
+    def __str__(self):
+        if not self.feature:
+            return f'Валідатор категорії "{self.category.name}" - характеристика не обрана'
+        return f'Валідатор категорії "{self.category.name}" | ' \
+               f'Характеристика - "{self.feature.feature_name}" | ' \
+               f'Значення - "{self.feature_value}"'
 
 
 class Cart(models.Model):
@@ -79,7 +133,6 @@ class Customer(models.Model):
 
 
 class Order(models.Model):
-
     STATUS_NEW = 'new'
     STATUS_IN_PROGRESS = 'in_progress'
     STATUS_READY = 'is_ready'
@@ -100,7 +153,8 @@ class Order(models.Model):
         (BUYING_TYPE_DELIVERY, 'Доставка')
     )
 
-    customer = models.ForeignKey(Customer, verbose_name='Покупець', related_name='related_orders', on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, verbose_name='Покупець', related_name='related_orders',
+                                 on_delete=models.CASCADE)
     first_name = models.CharField(max_length=255, verbose_name="Ім'я")
     last_name = models.CharField(max_length=255, verbose_name="Прізвище")
     phone = models.CharField(max_length=20, verbose_name="Телефон")
